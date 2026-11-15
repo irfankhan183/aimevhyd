@@ -1,53 +1,114 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIMEVHYD | EV Rental Management</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080b09;color:white;font-family:Arial,sans-serif}
-header{padding:24px;background:#101710;border-bottom:2px solid #39ff14}
-.logo{font-size:32px;font-weight:900;color:#39ff14}
+body{
+ margin:0;
+ background:#080b09;
+ color:white;
+ font-family:Arial,sans-serif
+}
+header{
+ padding:24px;
+ background:#101710;
+ border-bottom:2px solid #39ff14
+}
+.logo{
+ font-size:32px;
+ font-weight:900;
+ color:#39ff14
+}
 .tag{color:#ccc;margin-top:6px}
-main{max-width:650px;margin:25px auto;padding:18px}
+main{
+ max-width:650px;
+ margin:25px auto;
+ padding:18px
+}
 h1{font-size:27px}
 .green{color:#39ff14}
-.card{background:#121a14;border:1px solid #29452c;border-radius:15px;padding:20px;margin:18px 0}
-input{width:100%;padding:14px;margin:9px 0;background:#080b09;color:white;border:1px solid #456348;border-radius:8px}
-button{width:100%;padding:15px;background:#39ff14;color:#071007;font-weight:bold;border:0;border-radius:9px;margin-top:10px;font-size:16px}
+.card{
+ background:#121a14;
+ border:1px solid #29452c;
+ border-radius:15px;
+ padding:20px;
+ margin:18px 0
+}
+input{
+ width:100%;
+ padding:14px;
+ margin:9px 0;
+ background:#080b09;
+ color:white;
+ border:1px solid #456348;
+ border-radius:8px
+}
+button{
+ width:100%;
+ padding:15px;
+ background:#39ff14;
+ color:#071007;
+ font-weight:bold;
+ border:0;
+ border-radius:9px;
+ margin-top:10px;
+ font-size:16px
+}
+button:disabled{opacity:.6}
 .secondary{background:#263329;color:white}
-#message{padding:12px;border-radius:8px;margin-top:12px;display:none;overflow-wrap:anywhere}
+#message{
+ padding:12px;
+ border-radius:8px;
+ margin-top:12px;
+ display:none;
+ overflow-wrap:anywhere
+}
 footer{text-align:center;color:#888;padding:25px}
 </style>
 </head>
+
 <body>
+
 <header>
 <div class="logo">AIM EV</div>
 <div class="tag">APNA HYDERABAD, APNI EV!</div>
 </header>
 
 <main>
+
 <h1>Welcome to <span class="green">AIMEVHYD</span></h1>
 <p>Your Hyderabad EV rental management portal.</p>
 
 <div class="card">
 <h2>Admin Portal</h2>
 <p>Admin login and fleet management</p>
-<input id="adminId" type="text" placeholder="Admin ID">
-<input id="password" type="password" placeholder="Password">
+
+<input id="adminId" type="text"
+placeholder="Enter Admin ID">
+
+<input id="password" type="password"
+placeholder="Enter Password">
+
 <button id="loginBtn">ADMIN LOGIN</button>
-<button id="logoutBtn" class="secondary" style="display:none">LOG OUT</button>
+
+<button id="logoutBtn" class="secondary"
+style="display:none">LOG OUT</button>
+
 <div id="message"></div>
 </div>
 
 <div class="card">
 <h2>Rider Portal</h2>
 <p>Rider account and rental balance</p>
+
 <input id="riderId" placeholder="Enter Rider ID">
-<button onclick="showRiderMessage()">RIDER LOGIN</button>
+
+<button id="riderLoginBtn">RIDER LOGIN</button>
+
 <p id="riderMessage" class="green"></p>
 </div>
 
@@ -56,18 +117,31 @@ footer{text-align:center;color:#888;padding:25px}
 <h1 class="green">₹265 / day</h1>
 <p>Five-day prepaid recharge: ₹1,325</p>
 </div>
+
 </main>
 
 <footer>AIMEVHYD © 2026 | Hyderabad</footer>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+
 import {
- getAuth, signInWithEmailAndPassword, signOut
+ initializeApp
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+
+import {
+ getAuth,
+ signInWithEmailAndPassword,
+ signOut
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+
 import {
- getFirestore, collection, query, where, getDocs
+ getFirestore,
+ collection,
+ query,
+ where,
+ getDocs
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
 
 const firebaseConfig = {
  apiKey: "AIzaSyAe8jt5WuReBus5hK82zPweuwlLMiYUFAI",
@@ -78,32 +152,51 @@ const firebaseConfig = {
  appId: "1:906534851826:web:857e6997a0666fca576c6b"
 };
 
+
+// CHANGE THIS TO YOUR FIREBASE AUTHENTICATION EMAIL
+const ADMIN_EMAIL = "YOUR_FIREBASE_LOGIN_EMAIL";
+
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const ADMIN_EMAIL = "YOUR_FIREBASE_LOGIN_EMAIL";
+const db = getFirestore(app);
 
 const message = document.getElementById("message");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+
 
 function showMessage(text) {
  message.style.display = "block";
  message.textContent = text;
 }
 
-loginBtn.addEventListener("click", async () => {
-const adminId = document.getElementById("adminId").value.trim();
-const email = ADMIN_EMAIL;
-const password = document.getElementById("password").value;
 
-if (adminId !== "AIMEVHYD001") {
+loginBtn.addEventListener("click", async () => {
+
+ const adminId =
+ document.getElementById("adminId").value.trim();
+
+ const password =
+ document.getElementById("password").value;
+
+ const email = ADMIN_EMAIL;
+
+ if (!adminId || !password) {
+  showMessage("Please enter Admin ID and password.");
+  return;
+ }
+
+ if (adminId !== "AIMEVHYD001") {
   showMessage("Invalid Admin ID.");
   return;
+ }
 
- 
-
- if (!email || !password) {
-  showMessage("Please enter your email and password.");
+ if (
+  !email ||
+  email === "YOUR_FIREBASE_LOGIN_EMAIL"
+ ) {
+  showMessage("Please configure your Firebase admin email in the code.");
   return;
  }
 
@@ -111,7 +204,13 @@ if (adminId !== "AIMEVHYD001") {
  loginBtn.textContent = "PLEASE WAIT...";
 
  try {
-  const result = await signInWithEmailAndPassword(auth, email, password);
+
+  const result =
+  await signInWithEmailAndPassword(
+   auth,
+   email,
+   password
+  );
 
   const adminQuery = query(
    collection(db, "admins"),
@@ -120,38 +219,76 @@ if (adminId !== "AIMEVHYD001") {
 
   const adminSnapshot = await getDocs(adminQuery);
 
- if (
-  adminSnapshot.empty ||
-  adminSnapshot.docs[0].data().adminId !== adminId
-) {
+  const validAdmin = adminSnapshot.docs.some(
+   doc => doc.data().adminId === adminId
+  );
+
+  if (!validAdmin) {
+
    await signOut(auth);
-   showMessage("This account is not registered as an admin.");
+
+   showMessage(
+    "Admin verification failed. Check your Firestore admin document."
+   );
+
   } else {
-   showMessage("Admin login successful. Welcome to AIMEVHYD!");
+
+   showMessage(
+    "Admin login successful. Welcome to AIMEVHYD!"
+   );
+
    loginBtn.style.display = "none";
    logoutBtn.style.display = "block";
+
   }
+
  } catch (error) {
+
   showMessage("Login error: " + error.message);
+
  } finally {
+
   loginBtn.disabled = false;
   loginBtn.textContent = "ADMIN LOGIN";
+
  }
+
 });
+
 
 logoutBtn.addEventListener("click", async () => {
- await signOut(auth);
- loginBtn.style.display = "block";
- logoutBtn.style.display = "none";
- showMessage("You have logged out.");
+
+ try {
+  await signOut(auth);
+
+  loginBtn.style.display = "block";
+  logoutBtn.style.display = "none";
+
+  showMessage("You have logged out.");
+
+ } catch (error) {
+
+  showMessage("Logout error: " + error.message);
+
+ }
+
 });
 
-window.showRiderMessage = function() {
- const id = document.getElementById("riderId").value.trim();
+
+document.getElementById("riderLoginBtn")
+.addEventListener("click", () => {
+
+ const id =
+ document.getElementById("riderId").value.trim();
+
  document.getElementById("riderMessage").textContent =
-  id ? "Rider account connection is the next setup step." :
-  "Please enter your Rider ID.";
-};
+ id
+ ? "Rider account connection is the next setup step."
+ : "Please enter your Rider ID.";
+
+});
+
 </script>
+
 </body>
 </html>
