@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,16 +88,15 @@ footer{text-align:center;color:#888;padding:25px}
 <h2>Admin Portal</h2>
 <p>Admin login and fleet management</p>
 
-<input id="adminId" type="text"
-placeholder="Enter Admin ID">
+<input id="adminId" type="text" placeholder="Enter Admin ID">
 
-<input id="password" type="password"
-placeholder="Enter Password">
+<input id="password" type="password" placeholder="Enter Password">
 
 <button id="loginBtn">ADMIN LOGIN</button>
 
-<button id="logoutBtn" class="secondary"
-style="display:none">LOG OUT</button>
+<button id="logoutBtn" class="secondary" style="display:none">
+LOG OUT
+</button>
 
 <div id="message"></div>
 </div>
@@ -136,10 +136,8 @@ import {
 
 import {
  getFirestore,
- collection,
- query,
- where,
- getDocs
+ doc,
+ getDoc
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 
@@ -153,8 +151,10 @@ const firebaseConfig = {
 };
 
 
-// CHANGE THIS TO YOUR FIREBASE AUTHENTICATION EMAIL
-const ADMIN_EMAIL = "Ik9322603@gmail.com";
+// ADMIN DETAILS
+const ADMIN_EMAIL = "ik9322603@gmail.com";
+const ADMIN_ID = "AIMEVHYD001";
+const ADMIN_DOCUMENT_ID = "yfHgTKV0ock3P6bsguOE";
 
 
 const app = initializeApp(firebaseConfig);
@@ -180,23 +180,13 @@ loginBtn.addEventListener("click", async () => {
  const password =
  document.getElementById("password").value;
 
- const email = ADMIN_EMAIL;
-
  if (!adminId || !password) {
   showMessage("Please enter Admin ID and password.");
   return;
  }
 
- if (adminId !== "AIMEVHYD001") {
+ if (adminId !== ADMIN_ID) {
   showMessage("Invalid Admin ID.");
-  return;
- }
-
- if (
-  !email ||
-  email === "YOUR_FIREBASE_LOGIN_EMAIL"
- ) {
-  showMessage("Please configure your Firebase admin email in the code.");
   return;
  }
 
@@ -205,46 +195,64 @@ loginBtn.addEventListener("click", async () => {
 
  try {
 
-  const result =
-  await signInWithEmailAndPassword(
+  // STEP 1: FIREBASE AUTHENTICATION
+  const result = await signInWithEmailAndPassword(
    auth,
-   email,
+   ADMIN_EMAIL,
    password
   );
 
-  const adminQuery = query(
-   collection(db, "admins"),
-   where("email", "==", result.user.email)
+  // STEP 2: READ THE EXACT ADMIN DOCUMENT
+  const adminRef = doc(
+   db,
+   "admins",
+   ADMIN_DOCUMENT_ID
   );
 
-  const adminSnapshot = await getDocs(adminQuery);
+  const adminSnapshot = await getDoc(adminRef);
 
-  const validAdmin = adminSnapshot.docs.some(
-   doc => doc.data().adminId === adminId
-  );
-
-  if (!validAdmin) {
-
+  if (!adminSnapshot.exists()) {
    await signOut(auth);
-
-   showMessage(
-    "Admin verification failed. Check your Firestore admin document."
-   );
-
-  } else {
-
-   showMessage(
-    "Admin login successful. Welcome to AIMEVHYD!"
-   );
-
-   loginBtn.style.display = "none";
-   logoutBtn.style.display = "block";
-
+   showMessage("Admin document not found. Check the Firestore document ID.");
+   return;
   }
+
+  // STEP 3: VERIFY ADMIN DETAILS
+  const adminData = adminSnapshot.data();
+
+  const storedEmail = String(adminData.email || "")
+   .trim()
+   .toLowerCase();
+
+  const loggedInEmail = String(result.user.email || "")
+   .trim()
+   .toLowerCase();
+
+  const storedAdminId = String(adminData.adminId || "")
+   .trim();
+
+  if (
+   storedEmail !== loggedInEmail ||
+   storedAdminId !== ADMIN_ID
+  ) {
+   await signOut(auth);
+   showMessage("Admin details do not match. Check email and adminId fields.");
+   return;
+  }
+
+  // STEP 4: SUCCESS
+  showMessage("Admin login successful. Welcome to AIMEVHYD!");
+
+  loginBtn.style.display = "none";
+  logoutBtn.style.display = "block";
 
  } catch (error) {
 
-  showMessage("Login error: " + error.message);
+  if (error.code === "permission-denied") {
+   showMessage("Firestore permission denied. Admin document read access must be corrected.");
+  } else {
+   showMessage("Login error: " + error.message);
+  }
 
  } finally {
 
@@ -259,10 +267,13 @@ loginBtn.addEventListener("click", async () => {
 logoutBtn.addEventListener("click", async () => {
 
  try {
+
   await signOut(auth);
 
   loginBtn.style.display = "block";
   logoutBtn.style.display = "none";
+
+  document.getElementById("password").value = "";
 
   showMessage("You have logged out.");
 
