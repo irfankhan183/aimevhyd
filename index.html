@@ -80,7 +80,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const ADMIN_EMAIL = "YOUR_FIREBASE_LOGIN_EMAIL";
 
 const message = document.getElementById("message");
 const loginBtn = document.getElementById("loginBtn");
@@ -92,8 +92,15 @@ function showMessage(text) {
 }
 
 loginBtn.addEventListener("click", async () => {
- const email = document.getElementById("email").value.trim();
- const password = document.getElementById("password").value;
+const adminId = document.getElementById("adminId").value.trim();
+const email = ADMIN_EMAIL;
+const password = document.getElementById("password").value;
+
+if (adminId !== "AIMEVHYD001") {
+  showMessage("Invalid Admin ID.");
+  return;
+
+ 
 
  if (!email || !password) {
   showMessage("Please enter your email and password.");
@@ -113,7 +120,10 @@ loginBtn.addEventListener("click", async () => {
 
   const adminSnapshot = await getDocs(adminQuery);
 
-  if (adminSnapshot.empty) {
+ if (
+  adminSnapshot.empty ||
+  adminSnapshot.docs[0].data().adminId !== adminId
+) {
    await signOut(auth);
    showMessage("This account is not registered as an admin.");
   } else {
