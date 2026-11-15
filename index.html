@@ -57,7 +57,8 @@ button{
  border:0;
  border-radius:9px;
  margin-top:10px;
- font-size:16px
+ font-size:16px;
+ cursor:pointer
 }
 button:disabled{opacity:.6}
 .secondary{background:#263329;color:white}
@@ -88,15 +89,16 @@ footer{text-align:center;color:#888;padding:25px}
 <h2>Admin Portal</h2>
 <p>Admin login and fleet management</p>
 
-<input id="adminId" type="text" placeholder="Enter Admin ID">
+<input id="adminId" type="text"
+placeholder="Enter Admin ID">
 
-<input id="password" type="password" placeholder="Enter Password">
+<input id="password" type="password"
+placeholder="Enter Password">
 
 <button id="loginBtn">ADMIN LOGIN</button>
 
-<button id="logoutBtn" class="secondary" style="display:none">
-LOG OUT
-</button>
+<button id="logoutBtn" class="secondary"
+style="display:none">LOG OUT</button>
 
 <div id="message"></div>
 </div>
@@ -140,7 +142,6 @@ import {
  getDoc
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
-
 const firebaseConfig = {
  apiKey: "AIzaSyAe8jt5WuReBus5hK82zPweuwlLMiYUFAI",
  authDomain: "aimevhyd.firebaseapp.com",
@@ -150,12 +151,9 @@ const firebaseConfig = {
  appId: "1:906534851826:web:857e6997a0666fca576c6b"
 };
 
-
-// ADMIN DETAILS
+// ADMIN CONFIGURATION
 const ADMIN_EMAIL = "ik9322603@gmail.com";
 const ADMIN_ID = "AIMEVHYD001";
-const ADMIN_DOCUMENT_ID = "yfHgTKV0ock3P6bsguOE";
-
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -165,27 +163,25 @@ const message = document.getElementById("message");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
-
 function showMessage(text) {
  message.style.display = "block";
  message.textContent = text;
 }
 
-
 loginBtn.addEventListener("click", async () => {
 
- const adminId =
+ const enteredAdminId =
  document.getElementById("adminId").value.trim();
 
  const password =
  document.getElementById("password").value;
 
- if (!adminId || !password) {
+ if (!enteredAdminId || !password) {
   showMessage("Please enter Admin ID and password.");
   return;
  }
 
- if (adminId !== ADMIN_ID) {
+ if (enteredAdminId !== ADMIN_ID) {
   showMessage("Invalid Admin ID.");
   return;
  }
@@ -196,60 +192,79 @@ loginBtn.addEventListener("click", async () => {
  try {
 
   // STEP 1: FIREBASE AUTHENTICATION
+
   const result = await signInWithEmailAndPassword(
    auth,
    ADMIN_EMAIL,
    password
   );
 
-  // STEP 2: READ THE EXACT ADMIN DOCUMENT
+  // STEP 2: VERIFY ADMIN EMAIL
+
+  const loggedInEmail =
+   String(result.user.email || "").trim().toLowerCase();
+
+  if (loggedInEmail !== ADMIN_EMAIL.toLowerCase()) {
+   await signOut(auth);
+   showMessage("Admin email does not match.");
+   return;
+  }
+
+  // STEP 3: GET FIREBASE UID
+
+  const adminUID = result.user.uid;
+
+  // STEP 4: FIND ADMIN DOCUMENT USING UID
+
   const adminRef = doc(
    db,
    "admins",
-   ADMIN_DOCUMENT_ID
+   adminUID
   );
 
   const adminSnapshot = await getDoc(adminRef);
 
   if (!adminSnapshot.exists()) {
    await signOut(auth);
-   showMessage("Admin document not found. Check the Firestore document ID.");
+   showMessage(
+    "Admin document not found. Expected document ID: " + adminUID
+   );
    return;
   }
 
-  // STEP 3: VERIFY ADMIN DETAILS
+  // STEP 5: ADMIN VERIFIED
+
   const adminData = adminSnapshot.data();
 
-  const storedEmail = String(adminData.email || "")
-   .trim()
-   .toLowerCase();
-
-  const loggedInEmail = String(result.user.email || "")
-   .trim()
-   .toLowerCase();
-
-  const storedAdminId = String(adminData.adminId || "")
-   .trim();
-
-  if (
-   storedEmail !== loggedInEmail ||
-   storedAdminId !== ADMIN_ID
-  ) {
-   await signOut(auth);
-   showMessage("Admin details do not match. Check email and adminId fields.");
-   return;
-  }
-
-  // STEP 4: SUCCESS
-  showMessage("Admin login successful. Welcome to AIMEVHYD!");
+  showMessage(
+   "Admin login successful! Welcome to AIMEVHYD."
+  );
 
   loginBtn.style.display = "none";
   logoutBtn.style.display = "block";
 
+  document.getElementById("adminId").disabled = true;
+  document.getElementById("password").value = "";
+
  } catch (error) {
 
-  if (error.code === "permission-denied") {
-   showMessage("Firestore permission denied. Admin document read access must be corrected.");
+  console.error("AIMEVHYD login error:", error);
+
+  if (
+   error.code === "permission-denied" ||
+   error.code === "firestore/permission-denied"
+  ) {
+   showMessage(
+    "Firestore permission denied. Admin read rules need correction."
+   );
+  } else if (error.code === "auth/invalid-credential") {
+   showMessage(
+    "Invalid email or password. Check Firebase admin credentials."
+   );
+  } else if (error.code === "auth/network-request-failed") {
+   showMessage(
+    "Network error. Please check your internet connection."
+   );
   } else {
    showMessage("Login error: " + error.message);
   }
@@ -263,7 +278,6 @@ loginBtn.addEventListener("click", async () => {
 
 });
 
-
 logoutBtn.addEventListener("click", async () => {
 
  try {
@@ -273,9 +287,11 @@ logoutBtn.addEventListener("click", async () => {
   loginBtn.style.display = "block";
   logoutBtn.style.display = "none";
 
+  document.getElementById("adminId").disabled = false;
+
   document.getElementById("password").value = "";
 
-  showMessage("You have logged out.");
+  showMessage("You have logged out successfully.");
 
  } catch (error) {
 
@@ -284,7 +300,6 @@ logoutBtn.addEventListener("click", async () => {
  }
 
 });
-
 
 document.getElementById("riderLoginBtn")
 .addEventListener("click", () => {
@@ -300,6 +315,7 @@ document.getElementById("riderLoginBtn")
 });
 
 </script>
-
 </body>
 </html>
+
+   
