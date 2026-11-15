@@ -8,67 +8,19 @@
 
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- background:#080b09;
- color:white;
- font-family:Arial,sans-serif
-}
-header{
- padding:24px;
- background:#101710;
- border-bottom:2px solid #39ff14
-}
-.logo{
- font-size:32px;
- font-weight:900;
- color:#39ff14
-}
+body{margin:0;background:#080b09;color:white;font-family:Arial,sans-serif}
+header{padding:24px;background:#101710;border-bottom:2px solid #39ff14}
+.logo{font-size:32px;font-weight:900;color:#39ff14}
 .tag{color:#ccc;margin-top:6px}
-main{
- max-width:650px;
- margin:25px auto;
- padding:18px
-}
+main{max-width:650px;margin:25px auto;padding:18px}
 h1{font-size:27px}
 .green{color:#39ff14}
-.card{
- background:#121a14;
- border:1px solid #29452c;
- border-radius:15px;
- padding:20px;
- margin:18px 0
-}
-input{
- width:100%;
- padding:14px;
- margin:9px 0;
- background:#080b09;
- color:white;
- border:1px solid #456348;
- border-radius:8px
-}
-button{
- width:100%;
- padding:15px;
- background:#39ff14;
- color:#071007;
- font-weight:bold;
- border:0;
- border-radius:9px;
- margin-top:10px;
- font-size:16px;
- cursor:pointer
-}
+.card{background:#121a14;border:1px solid #29452c;border-radius:15px;padding:20px;margin:18px 0}
+input{width:100%;padding:14px;margin:9px 0;background:#080b09;color:white;border:1px solid #456348;border-radius:8px}
+button{width:100%;padding:15px;background:#39ff14;color:#071007;font-weight:bold;border:0;border-radius:9px;margin-top:10px;font-size:16px;cursor:pointer}
 button:disabled{opacity:.6}
 .secondary{background:#263329;color:white}
-#message{
- padding:12px;
- border-radius:8px;
- margin-top:12px;
- display:none;
- overflow-wrap:anywhere
-}
+#message{padding:12px;border-radius:8px;margin-top:12px;display:none;overflow-wrap:anywhere}
 footer{text-align:center;color:#888;padding:25px}
 </style>
 </head>
@@ -76,8 +28,8 @@ footer{text-align:center;color:#888;padding:25px}
 <body>
 
 <header>
-<div class="logo">AIM EV</div>
-<div class="tag">APNA HYDERABAD, APNI EV!</div>
+  <div class="logo">AIM EV</div>
+  <div class="tag">APNA HYDERABAD, APNI EV!</div>
 </header>
 
 <main>
@@ -86,38 +38,30 @@ footer{text-align:center;color:#888;padding:25px}
 <p>Your Hyderabad EV rental management portal.</p>
 
 <div class="card">
-<h2>Admin Portal</h2>
-<p>Admin login and fleet management</p>
+  <h2>Admin Portal</h2>
+  <p>Admin login and fleet management</p>
 
-<input id="adminId" type="text"
-placeholder="Enter Admin ID">
+  <input id="adminId" type="text" placeholder="Enter Admin ID">
+  <input id="password" type="password" placeholder="Enter Password">
 
-<input id="password" type="password"
-placeholder="Enter Password">
+  <button id="loginBtn">ADMIN LOGIN</button>
+  <button id="logoutBtn" class="secondary" style="display:none">LOG OUT</button>
 
-<button id="loginBtn">ADMIN LOGIN</button>
-
-<button id="logoutBtn" class="secondary"
-style="display:none">LOG OUT</button>
-
-<div id="message"></div>
+  <div id="message"></div>
 </div>
 
 <div class="card">
-<h2>Rider Portal</h2>
-<p>Rider account and rental balance</p>
-
-<input id="riderId" placeholder="Enter Rider ID">
-
-<button id="riderLoginBtn">RIDER LOGIN</button>
-
-<p id="riderMessage" class="green"></p>
+  <h2>Rider Portal</h2>
+  <p>Rider account and rental balance</p>
+  <input id="riderId" placeholder="Enter Rider ID">
+  <button id="riderLoginBtn">RIDER LOGIN</button>
+  <p id="riderMessage" class="green"></p>
 </div>
 
 <div class="card">
-<h2>Rental Pricing</h2>
-<h1 class="green">₹265 / day</h1>
-<p>Five-day prepaid recharge: ₹1,325</p>
+  <h2>Rental Pricing</h2>
+  <h1 class="green">₹265 / day</h1>
+  <p>Five-day prepaid recharge: ₹1,325</p>
 </div>
 
 </main>
@@ -126,32 +70,29 @@ style="display:none">LOG OUT</button>
 
 <script type="module">
 
-import {
- initializeApp
-} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 
 import {
- getAuth,
- signInWithEmailAndPassword,
- signOut
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
 import {
- getFirestore,
- doc,
- getDoc
+  getFirestore,
+  doc,
+  getDocFromServer
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyAe8jt5WuReBus5hK82zPweuwlLMiYUFAI",
- authDomain: "aimevhyd.firebaseapp.com",
- projectId: "aimevhyd",
- storageBucket: "aimevhyd.firebasestorage.app",
- messagingSenderId: "906534851826",
- appId: "1:906534851826:web:857e6997a0666fca576c6b"
+  apiKey: "AIzaSyAe8jt5WuReBus5hK82zPweuwlLMiYUFAI",
+  authDomain: "aimevhyd.firebaseapp.com",
+  projectId: "aimevhyd",
+  storageBucket: "aimevhyd.firebasestorage.app",
+  messagingSenderId: "906534851826",
+  appId: "1:906534851826:web:857e6997a0666fca576c6b"
 };
 
-// ADMIN CONFIGURATION
 const ADMIN_EMAIL = "ik9322603@gmail.com";
 const ADMIN_ID = "AIMEVHYD001";
 
@@ -164,153 +105,177 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 function showMessage(text) {
- message.style.display = "block";
- message.textContent = text;
+  message.style.display = "block";
+  message.textContent = text;
 }
 
 loginBtn.addEventListener("click", async () => {
 
- const enteredAdminId =
- document.getElementById("adminId").value.trim();
+  const enteredAdminId =
+    document.getElementById("adminId").value.trim();
 
- const password =
- document.getElementById("password").value;
+  const password =
+    document.getElementById("password").value;
 
- if (!enteredAdminId || !password) {
-  showMessage("Please enter Admin ID and password.");
-  return;
- }
-
- if (enteredAdminId !== ADMIN_ID) {
-  showMessage("Invalid Admin ID.");
-  return;
- }
-
- loginBtn.disabled = true;
- loginBtn.textContent = "PLEASE WAIT...";
-
- try {
-
-  // STEP 1: FIREBASE AUTHENTICATION
-
-  const result = await signInWithEmailAndPassword(
-   auth,
-   ADMIN_EMAIL,
-   password
-  );
-
-  // STEP 2: VERIFY ADMIN EMAIL
-
-  const loggedInEmail =
-   String(result.user.email || "").trim().toLowerCase();
-
-  if (loggedInEmail !== ADMIN_EMAIL.toLowerCase()) {
-   await signOut(auth);
-   showMessage("Admin email does not match.");
-   return;
+  if (!enteredAdminId || !password) {
+    showMessage("Please enter Admin ID and password.");
+    return;
   }
 
-  // STEP 3: GET FIREBASE UID
-
-  const adminUID = result.user.uid;
-
-  // STEP 4: FIND ADMIN DOCUMENT USING UID
-
-  const adminRef = doc(
-   db,
-   "admins",
-   adminUID
-  );
-
-  const adminSnapshot = await getDoc(adminRef);
-
-  if (!adminSnapshot.exists()) {
-   await signOut(auth);
-   showMessage(
-    "Admin document not found. Expected document ID: " + adminUID
-   );
-   return;
+  if (enteredAdminId !== ADMIN_ID) {
+    showMessage("Invalid Admin ID.");
+    return;
   }
 
-  // STEP 5: ADMIN VERIFIED
+  loginBtn.disabled = true;
+  loginBtn.textContent = "PLEASE WAIT...";
 
-  const adminData = adminSnapshot.data();
+  try {
 
-  showMessage(
-   "Admin login successful! Welcome to AIMEVHYD."
-  );
+    // STEP 1: FIREBASE AUTHENTICATION
 
-  loginBtn.style.display = "none";
-  logoutBtn.style.display = "block";
+    const result = await signInWithEmailAndPassword(
+      auth,
+      ADMIN_EMAIL,
+      password
+    );
 
-  document.getElementById("adminId").disabled = true;
-  document.getElementById("password").value = "";
+    // STEP 2: VERIFY EMAIL
 
- } catch (error) {
+    const loggedInEmail =
+      (result.user.email || "").trim().toLowerCase();
 
-  console.error("AIMEVHYD login error:", error);
+    if (loggedInEmail !== ADMIN_EMAIL.toLowerCase()) {
+      await signOut(auth);
+      showMessage("Admin email does not match.");
+      return;
+    }
 
-  if (
-   error.code === "permission-denied" ||
-   error.code === "firestore/permission-denied"
-  ) {
-   showMessage(
-    "Firestore permission denied. Admin read rules need correction."
-   );
-  } else if (error.code === "auth/invalid-credential") {
-   showMessage(
-    "Invalid email or password. Check Firebase admin credentials."
-   );
-  } else if (error.code === "auth/network-request-failed") {
-   showMessage(
-    "Network error. Please check your internet connection."
-   );
-  } else {
-   showMessage("Login error: " + error.message);
+    // STEP 3: GET AUTHENTICATED UID
+
+    const adminUID = result.user.uid;
+
+    // STEP 4: READ ADMIN DOCUMENT DIRECTLY FROM SERVER
+
+    const adminRef = doc(db, "admins", adminUID);
+
+    const adminSnapshot = await getDocFromServer(adminRef);
+
+    if (!adminSnapshot.exists()) {
+      await signOut(auth);
+      showMessage(
+        "ADMIN DOCUMENT NOT FOUND. UID: " + adminUID +
+        ". Check the admins collection in project aimevhyd."
+      );
+      return;
+    }
+
+    // STEP 5: VERIFY DOCUMENT FIELDS
+
+    const adminData = adminSnapshot.data();
+
+    const savedAdminId =
+      String(adminData.Adminid || "").trim();
+
+    const savedEmail =
+      String(adminData.Email || "").trim().toLowerCase();
+
+    if (
+      savedAdminId !== ADMIN_ID ||
+      savedEmail !== ADMIN_EMAIL.toLowerCase()
+    ) {
+      await signOut(auth);
+      showMessage(
+        "Admin document found, but its Adminid or Email field does not match."
+      );
+      return;
+    }
+
+    // STEP 6: SUCCESS
+
+    showMessage(
+      "Admin login successful! Welcome to AIMEVHYD."
+    );
+
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+
+    document.getElementById("adminId").disabled = true;
+    document.getElementById("password").value = "";
+
+  } catch (error) {
+
+    console.error("AIMEVHYD login error:", error);
+
+    if (error.code === "permission-denied" ||
+        error.code === "firestore/permission-denied") {
+
+      showMessage(
+        "Firestore permission denied. Check the published Firestore rules."
+      );
+
+    } else if (error.code === "auth/invalid-credential") {
+
+      showMessage(
+        "Invalid email or password. Check Firebase Authentication."
+      );
+
+    } else if (error.code === "auth/network-request-failed") {
+
+      showMessage("Network error. Check your internet connection.");
+
+    } else {
+
+      showMessage(
+        "Login error: " + error.code + " - " + error.message
+      );
+
+    }
+
+    if (auth.currentUser) {
+      await signOut(auth);
+    }
+
+  } finally {
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = "ADMIN LOGIN";
+
   }
-
- } finally {
-
-  loginBtn.disabled = false;
-  loginBtn.textContent = "ADMIN LOGIN";
-
- }
 
 });
 
 logoutBtn.addEventListener("click", async () => {
 
- try {
+  try {
 
-  await signOut(auth);
+    await signOut(auth);
 
-  loginBtn.style.display = "block";
-  logoutBtn.style.display = "none";
+    loginBtn.style.display = "block";
+    logoutBtn.style.display = "none";
 
-  document.getElementById("adminId").disabled = false;
+    document.getElementById("adminId").disabled = false;
+    document.getElementById("password").value = "";
 
-  document.getElementById("password").value = "";
+    showMessage("You have logged out successfully.");
 
-  showMessage("You have logged out successfully.");
+  } catch (error) {
 
- } catch (error) {
+    showMessage("Logout error: " + error.message);
 
-  showMessage("Logout error: " + error.message);
-
- }
+  }
 
 });
 
 document.getElementById("riderLoginBtn")
 .addEventListener("click", () => {
 
- const id =
- document.getElementById("riderId").value.trim();
+  const id = document.getElementById("riderId").value.trim();
 
- document.getElementById("riderMessage").textContent =
- id
- ? "Rider account connection is the next setup step."
- : "Please enter your Rider ID.";
+  document.getElementById("riderMessage").textContent =
+    id
+      ? "Rider account connection is the next setup step."
+      : "Please enter your Rider ID.";
 
 });
 
@@ -318,4 +283,4 @@ document.getElementById("riderLoginBtn")
 </body>
 </html>
 
-   
+
